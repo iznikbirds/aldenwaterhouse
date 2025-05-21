@@ -1,62 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Alden Waterhouse</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Georgia', serif;
-            background-color: #ffffff;
-            color: #111;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alden Waterhouse</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Georgia', serif;
+      background-color: #ffffff;
+      color: #111;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 4rem;
+    }
 
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
-        }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
 
-        .box {
-            border: 1px solid #ccc;
-            padding: 2rem;
-            width: 300px;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
+    h2 {
+      font-weight: normal;
+      margin-bottom: 2rem;
+    }
 
-        .box h2 {
-            margin-bottom: 1rem;
-            font-weight: normal;
-        }
+    .project-section {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
 
-        .box a button {
-            background-color: #111;
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+    canvas {
+      background: #005eff;
+      border-radius: 10px;
+    }
 
-        .box a button:hover {
-            background-color: #333;
-        }
-    </style>
+    a button {
+      background-color: #111;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.4rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    a button:hover {
+      background-color: #333;
+    }
+  </style>
 </head>
 <body>
-<h1>Alden Waterhouse</h1>
 
-<div class="box">
-    <h2>Projects</h2>
+  <h1>Alden Waterhouse</h1>
+  <h2>My Projects</h2>
+
+  <div class="project-section">
+    <canvas id="circleCanvas" width="300" height="300"></canvas>
     <a href="thesis.html"><button>Thesis (5/25)</button></a>
-</div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("circleCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const rows = 25;
+    const cols = 25;
+    const radius = 4;
+    const spacing = 12;
+    let angle = 0;
+
+    function drawFrame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(angle);
+      ctx.translate(-canvas.width / 2, -canvas.height / 2);
+
+      for (let x = 0; x < cols; x++) {
+        for (let y = 0; y < rows; y++) {
+          const px = x * spacing + spacing;
+          const py = y * spacing + spacing;
+
+          const distToCenter = Math.hypot(
+            px - canvas.width / 2,
+            py - canvas.height / 2
+          );
+
+          const size = 2 + 1.5 * Math.sin(distToCenter * 0.05 - angle * 4);
+          ctx.beginPath();
+          ctx.arc(px, py, Math.max(1, size), 0, Math.PI * 2);
+          ctx.fillStyle = "#fff";
+          ctx.fill();
+        }
+      }
+
+      ctx.restore();
+      angle += 0.01;
+      requestAnimationFrame(drawFrame);
+    }
+
+    drawFrame();
+  </script>
 </body>
 </html>
