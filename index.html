@@ -2,110 +2,343 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Alden Waterhouse</title>
   <style>
     body {
       margin: 0;
+      background: #ffffff;
       font-family: 'Georgia', serif;
-      background-color: #ffffff;
       color: #111;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding-top: 4rem;
+      padding: 3rem 1rem;
+      min-height: 100vh;
     }
 
-    h1 {
+    .paper-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .title {
+      text-align: center;
       font-size: 2.5rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 2rem;
     }
 
-    h2 {
-      font-weight: normal;
+    .author {
+      text-align: center;
+      font-size: 1.2rem;
       margin-bottom: 2rem;
+    }
+
+    .abstract {
+      background: #f8f8f8;
+      padding: 1.5rem;
+      margin: 2rem auto;
+      border-left: 4px solid #005eff;
+      max-width: 600px;
+    }
+
+    .abstract-title {
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    .intro-text {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding-left: 2rem;
     }
 
     .project-section {
       display: flex;
-      gap: 2rem;
+      flex-direction: row;
       align-items: center;
       justify-content: center;
+      gap: 3rem;
       flex-wrap: wrap;
+      margin-top: 2rem;
     }
 
-    canvas {
-      background: #005eff;
-      border-radius: 10px;
-    }
-
-    a button {
-      background-color: #111;
-      color: white;
-      border: none;
-      padding: 0.6rem 1.4rem;
-      font-size: 1rem;
+    .clickable-canvas {
       cursor: pointer;
-      transition: background-color 0.2s;
     }
 
-    a button:hover {
-      background-color: #333;
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+      .paper-container {
+        padding: 1rem;
+      }
+
+      .title {
+        font-size: 2rem;
+      }
+
+      .abstract {
+        max-width: 100%;
+        padding: 1rem;
+      }
+
+      .intro-text {
+        max-width: 100%;
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+
+      .project-section {
+        gap: 2rem;
+      }
+
+      .clickable-canvas {
+        width: 250px;
+        height: 250px;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="paper-container">
+    <h1 class="title">Personal Projects and Research</h1>
+    <div class="author">Alden Waterhouse</div>
+    
+    <div class="abstract">
+      <div class="abstract-title">Abstract.</div>
+      <p>This website serves as a collection of my personal projects and research work. It includes my recent investment thesis, a computer vision project I am working on, and various other miscellaneous projects or reports. This will be a constant work in progress. Feel free to click on whatever shape interests you.</p>
+    </div>
 
-  <h1>Alden Waterhouse</h1>
-  <h2>My Projects</h2>
+    <p class="intro-text">I am studying finance and CS as I see these disciplines to be strong levers at high derivatives. More specifically I've been researching investment in deeptech verticals, the broader PE/VC secondaries markets, and the alt data provider industry. Code and insights are marked with <a href="https://opensource.org/license/mit" target="_blank">MIT</a> and <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY</a> licenses, respectively.</p>
+  </div>
 
   <div class="project-section">
-    <canvas id="circleCanvas" width="300" height="300"></canvas>
-    <a href="thesis.html"><button>Thesis (5/25)</button></a>
+    <canvas id="pyramidCanvas" class="clickable-canvas" width="300" height="300"></canvas>
+    <canvas id="sphereCanvas" class="clickable-canvas" width="300" height="300"></canvas>
+    <canvas id="cubeCanvas" class="clickable-canvas" width="300" height="300"></canvas>
   </div>
 
   <script>
-    const canvas = document.getElementById("circleCanvas");
-    const ctx = canvas.getContext("2d");
+    // ---------- Pyramid ----------
+    const pyramidCanvas = document.getElementById('pyramidCanvas');
+    const pyramidCtx = pyramidCanvas.getContext('2d');
+    const pyramidW = pyramidCanvas.width;
+    const pyramidH = pyramidCanvas.height;
 
-    const rows = 25;
-    const cols = 25;
-    const radius = 4;
-    const spacing = 12;
-    let angle = 0;
+    pyramidCanvas.addEventListener('click', () => {
+      window.location.href = 'misc.html';
+    });
 
-    function drawFrame() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.save();
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.rotate(angle);
-      ctx.translate(-canvas.width / 2, -canvas.height / 2);
+    let pyramidAngle = 0;
+    const pyramidSize = 80;
+    const pyramidPoints = [
+      [0, -1, 0],    // top
+      [-1, 1, -1],   // bottom left front
+      [1, 1, -1],    // bottom right front
+      [1, 1, 1],     // bottom right back
+      [-1, 1, 1]     // bottom left back
+    ];
+    const pyramidEdges = [
+      [0,1], [0,2], [0,3], [0,4],  // top to bottom
+      [1,2], [2,3], [3,4], [4,1]   // bottom square
+    ];
 
-      for (let x = 0; x < cols; x++) {
-        for (let y = 0; y < rows; y++) {
-          const px = x * spacing + spacing;
-          const py = y * spacing + spacing;
+    function rotatePyramidPoint([x, y, z], angle) {
+      let sin = Math.sin(angle);
+      let cos = Math.cos(angle);
+      let x1 = x * cos - z * sin;
+      let z1 = x * sin + z * cos;
 
-          const distToCenter = Math.hypot(
-            px - canvas.width / 2,
-            py - canvas.height / 2
-          );
+      let y1 = y * cos - z1 * sin;
+      let z2 = y * sin + z1 * cos;
 
-          const size = 2 + 1.5 * Math.sin(distToCenter * 0.05 - angle * 4);
-          ctx.beginPath();
-          ctx.arc(px, py, Math.max(1, size), 0, Math.PI * 2);
-          ctx.fillStyle = "#fff";
-          ctx.fill();
-        }
-      }
-
-      ctx.restore();
-      angle += 0.01;
-      requestAnimationFrame(drawFrame);
+      let scale = 300 / (300 + z2 * pyramidSize);
+      return {
+        x: x1 * pyramidSize * scale,
+        y: y1 * pyramidSize * scale
+      };
     }
 
-    drawFrame();
+    function drawPyramid() {
+      pyramidCtx.clearRect(0, 0, pyramidW, pyramidH);
+      let projected = pyramidPoints.map(p => rotatePyramidPoint(p, pyramidAngle));
+
+      pyramidCtx.strokeStyle = '#111';
+      pyramidCtx.beginPath();
+      pyramidEdges.forEach(([a, b]) => {
+        pyramidCtx.moveTo(pyramidW / 2 + projected[a].x, pyramidH / 2 + projected[a].y);
+        pyramidCtx.lineTo(pyramidW / 2 + projected[b].x, pyramidH / 2 + projected[b].y);
+      });
+      pyramidCtx.stroke();
+
+      pyramidCtx.save();
+      pyramidCtx.translate(pyramidW / 2, pyramidH / 2);
+      pyramidCtx.fillStyle = "#005eff";
+      pyramidCtx.textAlign = "center";
+      pyramidCtx.font = "bold 20px Georgia";
+      pyramidCtx.fillText("MISCELLANEOUS", 0, 0);
+      pyramidCtx.restore();
+
+      pyramidAngle += 0.01;
+    }
+
+    // ---------- Sphere ----------
+    const sphereCanvas = document.getElementById('sphereCanvas');
+    const sphereCtx = sphereCanvas.getContext('2d');
+    const sphereW = sphereCanvas.width;
+    const sphereH = sphereCanvas.height;
+
+    sphereCanvas.addEventListener('click', () => {
+      window.location.href = 'thesis.html';
+    });
+
+    const radius = 100;
+    const latSteps = 15;
+    const longSteps = 30;
+    let sphereAngle = 0;
+
+    function project3D(x, y, z, angle) {
+      const cosA = Math.cos(angle);
+      const sinA = Math.sin(angle);
+      const xRot = cosA * x + sinA * z;
+      const zRot = -sinA * x + cosA * z;
+      const scale = 300 / (300 + zRot);
+      return {
+        x: xRot * scale,
+        y: y * scale,
+        z: zRot
+      };
+    }
+
+    function drawHalfSphere(ctx, isBack) {
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 1;
+
+      for (let i = 1; i < latSteps; i++) {
+        const lat = Math.PI * (i / latSteps - 0.5);
+        ctx.beginPath();
+        for (let j = 0; j <= longSteps; j++) {
+          const lon = 2 * Math.PI * (j / longSteps);
+          const x = radius * Math.cos(lat) * Math.cos(lon);
+          const y = radius * Math.sin(lat);
+          const z = radius * Math.cos(lat) * Math.sin(lon);
+          const p = project3D(x, y, z, sphereAngle);
+          if ((isBack && p.z > 0) || (!isBack && p.z <= 0)) continue;
+          if (j === 0) ctx.moveTo(sphereW/2 + p.x, sphereH/2 + p.y);
+          else ctx.lineTo(sphereW/2 + p.x, sphereH/2 + p.y);
+        }
+        ctx.stroke();
+      }
+
+      for (let j = 0; j < longSteps; j++) {
+        const lon = 2 * Math.PI * (j / longSteps);
+        ctx.beginPath();
+        for (let i = 0; i <= latSteps; i++) {
+          const lat = Math.PI * (i / latSteps - 0.5);
+          const x = radius * Math.cos(lat) * Math.cos(lon);
+          const y = radius * Math.sin(lat);
+          const z = radius * Math.cos(lat) * Math.sin(lon);
+          const p = project3D(x, y, z, sphereAngle);
+          if ((isBack && p.z > 0) || (!isBack && p.z <= 0)) continue;
+          if (i === 0) ctx.moveTo(sphereW/2 + p.x, sphereH/2 + p.y);
+          else ctx.lineTo(sphereW/2 + p.x, sphereH/2 + p.y);
+        }
+        ctx.stroke();
+      }
+    }
+
+    function drawSphere() {
+      sphereCtx.clearRect(0, 0, sphereW, sphereH);
+      drawHalfSphere(sphereCtx, true);
+
+      sphereCtx.save();
+      sphereCtx.translate(sphereW / 2, sphereH / 2);
+      sphereCtx.fillStyle = "#005eff";
+      sphereCtx.textAlign = "center";
+      sphereCtx.font = "bold 30px Georgia";
+      sphereCtx.fillText("THESIS", 0, 0);
+      sphereCtx.restore();
+
+      drawHalfSphere(sphereCtx, false);
+      sphereAngle += 0.01;
+    }
+
+    // ---------- Cube ----------
+    const cubeCanvas = document.getElementById('cubeCanvas');
+    const cubeCtx = cubeCanvas.getContext('2d');
+    const cubeW = cubeCanvas.width;
+    const cubeH = cubeCanvas.height;
+
+    cubeCanvas.addEventListener('click', () => {
+      window.location.href = 'computervision.html';
+    });
+
+    let cubeAngle = 0;
+    const cubeSize = 80;
+    const cubePoints = [
+      [-1, -1, -1], [1, -1, -1],
+      [1, 1, -1], [-1, 1, -1],
+      [-1, -1, 1], [1, -1, 1],
+      [1, 1, 1], [-1, 1, 1]
+    ];
+    const cubeEdges = [
+      [0,1], [1,2], [2,3], [3,0],
+      [4,5], [5,6], [6,7], [7,4],
+      [0,4], [1,5], [2,6], [3,7]
+    ];
+
+    function rotateCubePoint([x, y, z], angle) {
+      let sin = Math.sin(angle);
+      let cos = Math.cos(angle);
+      let x1 = x * cos - z * sin;
+      let z1 = x * sin + z * cos;
+
+      let y1 = y * cos - z1 * sin;
+      let z2 = y * sin + z1 * cos;
+
+      let scale = 300 / (300 + z2 * cubeSize);
+      return {
+        x: x1 * cubeSize * scale,
+        y: y1 * cubeSize * scale
+      };
+    }
+
+    function drawCube() {
+      cubeCtx.clearRect(0, 0, cubeW, cubeH);
+      let projected = cubePoints.map(p => rotateCubePoint(p, cubeAngle));
+
+      cubeCtx.strokeStyle = '#111';
+      cubeCtx.beginPath();
+      cubeEdges.forEach(([a, b]) => {
+        cubeCtx.moveTo(cubeW / 2 + projected[a].x, cubeH / 2 + projected[a].y);
+        cubeCtx.lineTo(cubeW / 2 + projected[b].x, cubeH / 2 + projected[b].y);
+      });
+      cubeCtx.stroke();
+
+      cubeCtx.save();
+      cubeCtx.translate(cubeW / 2, cubeH / 2);
+      cubeCtx.fillStyle = "#005eff";
+      cubeCtx.textAlign = "center";
+      cubeCtx.font = "bold 16px Georgia";
+      cubeCtx.fillText("COMPUTER", 0, -10);
+      cubeCtx.fillText("VISION", 0, 15);
+      cubeCtx.restore();
+
+      cubeAngle += 0.01;
+    }
+
+    // ---------- Animation Loop ----------
+    function animate() {
+      drawPyramid();
+      drawSphere();
+      drawCube();
+      requestAnimationFrame(animate);
+    }
+
+    animate();
   </script>
 </body>
 </html>
+
